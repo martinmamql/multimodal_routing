@@ -14,7 +14,8 @@ To retrieve the meta information and the raw data, please refer to the [SDK for 
 
 ### Commands
 To run the program which gives computational results like accuracy and F1 scores, 
-```bash run.sh````
+
+```bash run.sh```
 
 Analysis of interpretability in jupyter notebooks will come soon.
 
