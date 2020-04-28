@@ -98,23 +98,6 @@ parser.add_argument('--seed', default=None, type=int,
                     help='seed for initializing training. ')
 parser.add_argument('--gpu', default=0, type=int,
                     help='GPU id to use. (default: 0)')
-#parser.add_argument('--world-size', default=-1, type=int,
-#                    help='number of nodes for distributed training')
-#parser.add_argument('--rank', default=-1, type=int,
-#                    help='node rank for distributed training')
-#parser.add_argument('--dist-url', default='tcp://224.66.41.62:23456', type=str,
-#                    help='url used to set up distributed training')
-#parser.add_argument('--dist-backend', default='nccl', type=str,
-#                    help='distributed backend')
-#parser.add_argument('--seed', default=None, type=int,
-#                    help='seed for initializing training. ')
-#parser.add_argument('--gpu', default=0, type=int,
-#                    help='GPU id to use. (default: 0)')
-#parser.add_argument('--multiprocessing-distributed', action='store_true',
-#                    help='Use multi-processing distributed training to launch '
-#                         'N processes per node, which has N GPUs. This is the '
-#                         'fastest way to use PyTorch for either single node or '
-#                         'multi node data parallel training')
 
 best_acc1 = 0
 
@@ -142,39 +125,12 @@ def main():
     elif args.dataset == 'iemocap':
         args.output_dim = 4
 
-    #if args.dist_url == "env://" and args.world_size == -1:
-    #    args.world_size = int(os.environ["WORLD_SIZE"])
-    #args.distributed = args.world_size > 1 or args.multiprocessing_distributed
-    #print(args.distributed)
-    #assert False
     ngpus_per_node = torch.cuda.device_count() # 4
-    #print("Using multiprocessing distributed: ", args.multiprocessing_distributed)
-    #if args.multiprocessing_distributed:
-    #    # Since we have ngpus_per_node processes per node, the total world_size
-    #    # needs to be adjusted accordingly
-    #    args.world_size = ngpus_per_node * args.world_size
-    #    # Use torch.multiprocessing.spawn to launch distributed processes: the
-    #    # main_worker process function
-    #    mp.spawn(main_worker, nprocs=ngpus_per_node, args=(ngpus_per_node, args, params))
-    #else:
-    #    # Simply call main_worker function
     main_worker(args.gpu, ngpus_per_node, args)
 
 def main_worker(gpu, ngpus_per_node, args):
     global best_acc1
     args.gpu = gpu
-
-    #if args.gpu is not None:
-    #    print("Use GPU: {} for training".format(args.gpu))
-    #if args.distributed:
-    #    if args.dist_url == "env://" and args.rank == -1:
-    #        args.rank = int(os.environ["RANK"])
-    #    if args.multiprocessing_distributed:
-    #        # For multiprocessing distributed training, rank needs to be the
-    #        # global rank among all the processes
-    #        args.rank = args.rank * ngpus_per_node + gpu
-    #    dist.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
-    #                            world_size=args.world_size, rank=args.rank)
 
     # create model
     if args.pretrained:
@@ -228,58 +184,8 @@ def main_worker(gpu, ngpus_per_node, args):
                     output_dim=7,
                     out_dropout=0.5,
                     multimodal_transformer=True) 
-        #elif args.arch == "vanilla_transformer":
-        #    model = Transformer(early_fusion=False,
-        #            d_model=100,
-        #            n_head=5, 
-        #            dim_feedforward=2048, 
-        #            dropout=0.1, 
-        #            num_layers=5, 
-        #            layer_norm=False, #'Implement layer norm later', 
-        #            embed_dropout=0.1,
-        #            output_dim=7,
-        #            out_dropout=0.5,
-        #            multimodal_transformer=False) 
-        #elif args.arch == "rnn" or "lstm" or "lf_lstm" or "gru":
-        #    model = RNN(early_fusion=False,
-        #            d_model=100, 
-        #            num_layers=2, 
-        #            embed_dropout=0.1, 
-        #            output_dim=args.output_dim, 
-        #            out_dropout=0.5,
-        #            arch = args.arch)
-        #elif args.arch == "ef_lstm":
-        #    model = RNN(early_fusion=True,
-        #            d_model=100, 
-        #            num_layers=2, 
-        #            embed_dropout=0.1, 
-        #            output_dim=args.output_dim, 
-        #            out_dropout=0.5,
-        #            arch = args.arch)
-    #if args.distributed:
-    #    # For multiprocessing distributed, DistributedDataParallel constructor
-    #    # should always set the single device scope, otherwise,
-    #    # DistributedDataParallel will use all available devices.
-    #    if args.gpu is not None:
-    #        torch.cuda.set_device(args.gpu)
-    #        model.cuda(args.gpu)
-    #        # When using a single GPU per process and per
-    #        # DistributedDataParallel, we need to divide the batch size
-    #        # ourselves based on the total number of GPUs we have
-    #        args.batch_size = int(args.batch_size / ngpus_per_node)
-    #        args.workers = int((args.workers + ngpus_per_node - 1) / ngpus_per_node)
-    #        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
-    #    else:
-    #        model.cuda()
-    #        # DistributedDataParallel will divide and allocate batch_size to all
-    #        # available GPUs if device_ids are not set
-    #        model = torch.nn.parallel.DistributedDataParallel(model)
-    #elif args.gpu is not None:
     torch.cuda.set_device(args.gpu)
     model = model.cuda(args.gpu)
-    #else:
-    #    # DataParallel will divide and allocate batch_size to all available GPUs
-    #    model = torch.nn.DataParallel(model).cuda()
 
     # define loss function (criterion) and optimizer
     dataset = args.dataset
@@ -310,9 +216,6 @@ def main_worker(gpu, ngpus_per_node, args):
                 checkpoint = torch.load(args.resume, map_location=loc)
             args.start_epoch = checkpoint['epoch']
             best_acc = checkpoint['best_acc']
-            # if args.gpu is not None:
-            #     # best_acc1 may be from a checkpoint from a different GPU
-            #     best_acc = best_acc.to(args.gpu)
             model.load_state_dict(checkpoint['state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer'])
             print("=> loaded checkpoint '{}' (epoch {})"
@@ -588,10 +491,6 @@ def validate(loader, model, criterion, args, ctc_a2l_module=None):
                 raw_loss = criterion(preds, eval_attr)
                 results.append(preds)
                 truths.append(eval_attr)
-                #eval_attr = eval_attr.long()
-                #raw_loss = criterion(preds, eval_attr.argmax(-1))
-                #results.append(preds)
-                #truths.append(eval_attr)
             elif args.dataset == "mosei_senti":
                 eval_attr_original = eval_attr.clone().detach()
                 eval_attr = torch.squeeze((torch.round(eval_attr) + 3).type("torch.cuda.LongTensor"))
@@ -624,12 +523,8 @@ def validate(loader, model, criterion, args, ctc_a2l_module=None):
                 #        a_matrix_all = torch.cat((a_matrix_all, activation[b].unsqueeze(0)), dim=0)
                 #        r_matrix_all = torch.cat((r_matrix_all, routing_coefficient[b].unsqueeze(0)), dim=0)
                 #        meta_info.append(batch_META)
-                    #print(preds_in_digit[b].shape)
-                    #print(eval_attr[b].shape)
-                    #assert False
                     #correct_matrix = torch.cat((correct_matrix, torch.tensor(float(preds_in_digit[b] + 3 == eval_attr[b])).view(1, 1)), dim=0)
             total_loss += raw_loss.item() * batch_size
-            # measure elapsed time
     avg_loss = total_loss / total_batch_size
     results = torch.cat(results)
     truths = torch.cat(truths)

@@ -27,7 +27,6 @@ class CapsuleFC(nn.Module):
                                           torch.randn(in_n_capsules, in_d_capsules, out_n_capsules, out_d_capsules))
 
 
-        # self.pose_to_vote_nonlinear = nn.Sequential()
         self.dropout_rate = dp
         if small_std:
             self.nonlinear_act = nn.Sequential()
@@ -71,37 +70,13 @@ class CapsuleFC(nn.Module):
         # query_key: routing coefficient
 
         current_act = current_act.view(current_act.shape[0], -1)
-        #if self.act_type == 'EM':
-        #    # ensure the beta is larger than zero
-        #    beta_u = F.relu(self.beta_u)
-        #    beta_a = F.relu(self.beta_a)
         w = self.w # 7, 64, 7, 64, in_n_capsules, in_d_capsules, out_n_capsules, out_d_capsules
         if next_capsule_value is None:
             query_key = torch.zeros(self.in_n_capsules, self.out_n_capsules).type_as(input) # 7, 7; in_n_capsules, out_n_capsules
             query_key = F.softmax(query_key, dim=1) # turns into proability
             next_capsule_value = torch.einsum('nm, bna, namd->bmd', query_key, input, w)
-            #if self.act_type == 'EM':
-            #    _diff = beta_u.unsqueeze(dim=0).expand_as(query_key)
-            #    cost = torch.einsum('nm, bn, nm->bnm', query_key, current_act, _diff)
-            #elif self.act_type == 'Hubert':
-            #    act_1 = torch.einsum('nam, bna->bm', self.beta, input)
-            #    act_2 = 0 #torch.einsum('nm, bn, m->bm', query_key, current_act, torch.max(self.alpha,\
-            #    #                                torch.ones_like(self.alpha)))
         else:
-            # w1 = self.w1
-            # w2 = self.w2
-            # vote = self.pose_to_vote_nonlinear(torch.einsum('bna, namz->bnmz', input, w1))
-            # vote = self.pose_to_vote_nonlinear(torch.einsum('bnmz, nzmd->bnmd', vote, w2))
-            #vote = torch.sigmoid(torch.einsum('bna, namz->bnmz', input, w1))
-            #vote = torch.sigmoid(torch.einsum('bnmz, nzmd->bnmd', vote, w2))
-            # _query_key = torch.einsum('bnmd, bmd->bnm', vote, next_capsule_value)
             if uniform_routing:
-                #_query_key = torch.zeros(input.shape[0], self.in_n_capsules, self.out_n_capsules).type_as(input) # 7, 7; in_n_capsules, out_n_capsules
-                #_query_key = F.softmax(_query_key, dim=1) # uniform proability
-                #_query_key.mul_(self.scale)
-                #query_key = F.softmax(_query_key, dim=2)
-                #query_key = torch.einsum('bnm, bm->bnm', query_key, next_act)
-                #query_key = query_key / (torch.sum(query_key, dim=2, keepdim=True) + 1e-10)
                 query_key = torch.zeros(input.shape[0], self.in_n_capsules, self.out_n_capsules).type_as(input) # 7, 7; in_n_capsules, out_n_capsules
                 _query_key = torch.zeros(input.shape[0], self.in_n_capsules, self.out_n_capsules).type_as(input) # 7, 7; in_n_capsules, out_n_capsules
                 query_key = F.softmax(query_key, dim=1) # turns into proability
@@ -111,32 +86,8 @@ class CapsuleFC(nn.Module):
                 query_key = F.softmax(_query_key, dim=2)
                 query_key = torch.einsum('bnm, bm->bnm', query_key, next_act)
                 query_key = query_key / (torch.sum(query_key, dim=2, keepdim=True) + 1e-10)
-                #print(torch.sum(query_key, dim=2, keepdim=True))
-                #query_key = query_key / (torch.sum(query_key, dim=2, keepdim=True))
-                #query_key = query_key / (torch.sum(query_key, dim=2, keepdim=True) + 1e-5)
-            #print("w {:5.5f} {:5.5f}".format(w.mean().item(), w.std().item()))
-            #print("r {:5.5f} {:5.5f}".format(query_key.mean().item(), query_key.std().item()))
-            #print("i {:5.5f} {:5.5f}".format(input.mean().item(), input.std().item()))
-            #print("a {:5.5f} {:5.5f}".format(current_act.mean().item(), current_act.std().item()))
             next_capsule_value = torch.einsum('bnm, bna, namd, bn->bmd', query_key, input, 
                                                   w, current_act)
-            #print(next_capsule_value[0])
-            #print()
-            #print(next_capsule_value.mean().item())
-            #if self.act_type == 'EM':
-            #    _diff = beta_u.unsqueeze(dim=0).unsqueeze(dim=1).expand_as(_query_key) - _query_key
-            #    cost = torch.einsum('bnm, bn, bnm->bnm', query_key, current_act, _diff)
-            #elif self.act_type == 'Hubert':
-            #    act_1 = torch.einsum('nam, bna->bm', self.beta, input)
-            #    act_2 = torch.einsum('bnm, bn, m, bnm->bm', query_key, current_act, \
-            #             torch.max(self.alpha,torch.ones_like(self.alpha)), _query_key) 
-        #if self.act_type == 'EM':
-        #    cost = torch.sum(cost, dim=1)
-        #    next_act = torch.sigmoid((num_iter+1)*(beta_a.unsqueeze(dim=0).expand_as(cost) - cost))
-        #elif self.act_type == 'ONES':
-        #    next_act = torch.ones(next_capsule_value.shape[0:2]).type_as(next_capsule_value)
-        #elif self.act_type == 'Hubert':
-        #    next_act = torch.sigmoid((num_iter+1)*(act_1 + act_2))
         if self.act_type == 'ONES':
             next_act = torch.ones(next_capsule_value.shape[0:2]).type_as(next_capsule_value)
         next_capsule_value = self.drop(next_capsule_value)

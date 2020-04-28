@@ -90,7 +90,6 @@ class CapsModel(nn.Module):
 
         ''' This should be automatically calculated instead of hard code! '''
         self.mc_caps_dim = mc_caps_dim
-        # is this correct? Can we decide this or not?
         self.mc = capsule_layers.CapsuleFC(in_n_capsules=7,
                 in_d_capsules=self.pc_dim,
                 out_n_capsules=self.mc_num_caps,
@@ -101,15 +100,10 @@ class CapsModel(nn.Module):
                 small_std=not layer_norm,
                 dim_pose_to_vote=dim_pose_to_vote
                 )
-        # 0.1 originally
         self.embedding = nn.Parameter(0.1*torch.rand(self.mc_num_caps, self.mc_caps_dim))
-        #if self.act_type == 'ONES':
-            #print("Should not use ONES as activation!")
-            #assert False
         if layer_norm:
             print("Using layer norm.")
         else: # Layer Norm
-            # assert False
             print("Not using layer norm")
             self.nonlinear_act = nn.Sequential()
         self.num_routing = num_routing
@@ -204,7 +198,6 @@ class LinearModel(nn.Module):
                                          embed_dropout=embed_dropout, 
                                          attn_mask=True 
             ) 
-            # self.t_in_dim = self.v_in_dim = self.a_in_dim = self.d_mult * 2
             self.t_in_dim = self.v_in_dim = self.a_in_dim = self.d_mult
         else:
             self.t_in_dim = 300

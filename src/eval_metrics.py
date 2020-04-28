@@ -56,7 +56,6 @@ def eval_mosei_senti(results, truths, results_weighted, truths_rounded, exclude_
           "mult_acc_5: ", mult_a5.round(3), "F1 score: ", f_score.round(3), "Accuracy: ", \
           accuracy_score(binary_truth, binary_preds).round(3))
 
-    #print("-" * 50)
     return mult_a7, mult_a5
 
 
@@ -86,14 +85,11 @@ def eval_iemocap(results, truths):
     test_preds = results.view(-1, 4, 2).cpu().detach().numpy()
     test_truth = truths.view(-1, 4).cpu().detach().numpy()
     for emo_ind in range(4):
-        #print(f"{emos[emo_ind]}: ")
         test_preds_i = np.argmax(test_preds[:,emo_ind], axis=1)
         test_truth_i = test_truth[:,emo_ind]
         f1 = f1_score(test_truth_i, test_preds_i, average='weighted')
         acc = accuracy_score(test_truth_i, test_preds_i)
         f1_total.append(f1)
         acc_total.append(acc)
-        #print("  - F1 Score: ", f1)
-        #print("  - Accuracy: ", acc)
 
     return acc_total, f1_total

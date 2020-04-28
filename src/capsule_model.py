@@ -88,9 +88,7 @@ class CapsModel(nn.Module):
             print("currently support mosei senti and iemocap only")
             assert False
 
-        ''' This should be automatically calculated instead of hard code! '''
         self.mc_caps_dim = mc_caps_dim
-        # is this correct? Can we decide this or not?
         self.mc = capsule_layers.CapsuleFC(in_n_capsules=7,
                 in_d_capsules=self.pc_dim,
                 out_n_capsules=self.mc_num_caps,
@@ -101,16 +99,10 @@ class CapsModel(nn.Module):
                 small_std=not layer_norm,
                 dim_pose_to_vote=dim_pose_to_vote
                 )
-        # 0.1 originally
-        # self.embedding = nn.Parameter(0.1*torch.rand(self.mc_num_caps, self.mc_caps_dim))
         self.embedding = nn.Parameter(torch.zeros(self.mc_num_caps, self.mc_caps_dim))
-        #if self.act_type == 'ONES':
-            #print("Should not use ONES as activation!")
-            #assert False
         if layer_norm:
             print("Using layer norm.")
         else: # Layer Norm
-            # assert False
             print("Not using layer norm")
             self.nonlinear_act = nn.Sequential()
         self.num_routing = num_routing
@@ -139,8 +131,6 @@ class CapsModel(nn.Module):
         init_capsule_pose = pc_input[:,:,:self.pc_dim]
         # Activation Value
         init_capsule_act = torch.sigmoid(pc_input[:,:,self.pc_dim:])  
-        # init_capsule_act = F.relu(pc_input[:,:,self.pc_dim:])  
-        # init_capsule_act = torch.tanh(pc_input[:,:,self.pc_dim:])  
         # First routing
         decision_pose, decision_act, _ = self.mc(init_capsule_pose, init_capsule_act, 0)
         # second to last routing
@@ -148,5 +138,4 @@ class CapsModel(nn.Module):
             decision_pose, decision_act, routing_coefficient = self.mc(init_capsule_pose, init_capsule_act, n, \
                                 decision_pose, decision_act)    
         decision_logits = torch.einsum('bcd, cd ->bc', decision_pose, self.embedding)
-        #decision_logits += self.bias
         return decision_logits, init_capsule_act.squeeze(-1), routing_coefficient

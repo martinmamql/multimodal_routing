@@ -57,12 +57,6 @@ class MULTModel(nn.Module):
             self.trans_v_with_l = self.get_network(self_type='vl')
             self.trans_v_with_a = self.get_network(self_type='va')
         
-        # 3. Self Attentions (Could be replaced by LSTMs, GRUs, etc.)
-        #    [e.g., self.trans_x_mem = nn.LSTM(self.d_x, self.d_x, 1)
-        # self.trans_l_mem = self.get_network(self_type='l_mem', layers=3)
-        # self.trans_a_mem = self.get_network(self_type='a_mem', layers=3)
-        # self.trans_v_mem = self.get_network(self_type='v_mem', layers=3)
-
         self.final_lav = nn.Linear(3 * d_l, d_l)
     def get_network(self, self_type='l', layers=-1):
         if self_type in ['l', 'al', 'vl']:
@@ -117,32 +111,18 @@ class MULTModel(nn.Module):
             h_l_only = self.trans_l(proj_x_l)
             h_l_with_as = self.trans_l_with_a(proj_x_l, proj_x_a, proj_x_a)    # Dimension (L, N, d_l)
             h_l_with_vs = self.trans_l_with_v(proj_x_l, proj_x_v, proj_x_v)    # Dimension (L, N, d_l)
-            #h_ls = torch.cat([h_l_with_as, h_l_with_vs], dim=2)
-            #h_ls = self.trans_l_mem(h_ls)
-            #if type(h_ls) == tuple:
-            #    h_ls = h_ls[0]
-            # print("h_ls", h_ls.shape)
-            # Use the latent representation here
 
         if self.aonly:
             # (L,V) --> A
             h_a_only = self.trans_a(proj_x_a)
             h_a_with_ls = self.trans_a_with_l(proj_x_a, proj_x_l, proj_x_l)
             h_a_with_vs = self.trans_a_with_v(proj_x_a, proj_x_v, proj_x_v)
-            #h_as = torch.cat([h_a_with_ls, h_a_with_vs], dim=2)
-            #h_as = self.trans_a_mem(h_as)
-            #if type(h_as) == tuple:
-            #    h_as = h_as[0]
 
         if self.vonly:
             # (L,A) --> V
             h_v_only = self.trans_v(proj_x_v)
             h_v_with_ls = self.trans_v_with_l(proj_x_v, proj_x_l, proj_x_l)
             h_v_with_as = self.trans_v_with_a(proj_x_v, proj_x_a, proj_x_a)
-            #h_vs = torch.cat([h_v_with_ls, h_v_with_as], dim=2)
-            #h_vs = self.trans_v_mem(h_vs)
-            #if type(h_vs) == tuple:
-            #    h_vs = h_vs[0]
 
         h_l_last = h_l_only[-1] # bs, d_l
         h_a_last = h_a_only[-1]
@@ -153,5 +133,4 @@ class MULTModel(nn.Module):
         h_vl_last = h_v_with_ls[-1]
         h_lav_last = torch.cat([h_a_with_ls, h_v_with_as, h_l_with_vs], dim=2)[-1] # bs, d_l * 3
         return h_l_last, h_a_last, h_v_last, h_la_last, h_av_last, h_vl_last, self.final_lav(h_lav_last)
-        #return h_ls.transpose(0,1), h_as.transpose(0,1), h_vs.transpose(0,1)
 
