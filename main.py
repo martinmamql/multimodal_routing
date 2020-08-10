@@ -20,7 +20,7 @@ import torch.utils.data.distributed
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 
-from src.utils import get_data
+from src.capsule_utils import get_data
 from src.capsule_model import CapsModel 
 from src.transformer_model import Transformer 
 from src.eval_metrics import eval_mosei_senti, eval_iemocap, eval_mosei_emo
