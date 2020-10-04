@@ -1,4 +1,4 @@
-# multimodal-routing
+# multimodal_routing
 [UPDATE COMING SOON] Repository for the paper Interpretable Multimodal Routing for Human Multimodal Language.
 
 ### Prerequisites
