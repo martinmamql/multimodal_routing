@@ -1,5 +1,6 @@
 # multimodal_routing
 Repository for EMNLP'20 paper Multimodal Routing: Improving Local and Global Interpretability of Multimodal Language Analysis.
+
 [Arxiv]: https://arxiv.org/abs/2004.14198
 
 ### Prerequisites
