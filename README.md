@@ -1,5 +1,6 @@
 # multimodal_routing
-[UPDATE COMING SOON] Repository for the paper Interpretable Multimodal Routing for Human Multimodal Language.
+Repository for EMNLP'20 paper Multimodal Routing: Improving Local and Global Interpretability ofMultimodal Language Analysis.
+[Arxiv]: https://arxiv.org/abs/2004.14198
 
 ### Prerequisites
 - Python 3.6
