@@ -9,7 +9,7 @@ Repository for EMNLP'20 paper Multimodal Routing: Improving Local and Global Int
 
 ### Datasets
 
-Data files (containing processed MOSI, MOSEI and IEMOCAP datasets) can be downloaded from [here](https://www.dropbox.com/s/jf216k3jpwwum46/Archive.zip?dl=0).
+Data files (containing processed MOSI, MOSEI and IEMOCAP datasets) can be downloaded from [here](https://www.dropbox.com/sh/hyzpgx1hp9nj37s/AAB7FhBqJOFDw2hEyvv2ZXHxa?dl=0).
 
 To retrieve the meta information and the raw data, please refer to the [SDK for these datasets](https://github.com/A2Zadeh/CMU-MultimodalSDK).
 
