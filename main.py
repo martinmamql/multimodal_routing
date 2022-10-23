@@ -286,19 +286,7 @@ def main_worker(gpu, ngpus_per_node, args):
             print('Epoch {:2d} | Train Loss {:5.4f} | Valid Loss {:5.4f} | Test Loss {:5.4f} | Train Acc {:5.4f} | Valid Acc {:5.4f} | Test Acc {:5.4f}'
                     .format(epoch, train_loss, valid_loss, test_loss, train_acc, valid_acc, test_acc))
             # remember best acc@1 and save checkpoint
-            is_best = test_acc > best_acc
-            #if is_best:
-            #    best_epoch = epoch
-            #    best_acc = max(test_acc, best_acc)
-            #    if not args.multiprocessing_distributed or (args.multiprocessing_distributed
-            #            and args.rank % ngpus_per_node == 0):
-            #        save_checkpoint({
-            #            'epoch': epoch + 1,
-            #            'arch': args.arch,
-            #            'state_dict': model.state_dict(),
-            #            'best_acc': best_acc,
-            #            'optimizer' : optimizer.state_dict(),
-            #        }, is_best, "mosei_senti_checkpoint_{}.pth.tar".format(random.random()), args.dataset)
+            is_best = valid_acc > best_acc
         elif args.dataset == "iemocap":
             train_acc, train_f1 = eval_iemocap(train_results, train_truth)
             valid_acc, valid_f1 = eval_iemocap(valid_results, valid_truth)
@@ -320,19 +308,7 @@ def main_worker(gpu, ngpus_per_node, args):
             best_f1_sad = max(best_f1_sad, test_f1[2])
             best_f1_angry = max(best_f1_angry, test_f1[3])
             test_acc = (best_acc_neutral + best_acc_happy + best_acc_sad + best_acc_angry + best_f1_neutral + best_f1_happy + best_f1_sad + best_f1_angry) / 8
-            is_best = test_acc > best_acc
-            #if is_best:
-            #    best_epoch = epoch
-            #    best_acc = max(test_acc, best_acc)
-            #    if not args.multiprocessing_distributed or (args.multiprocessing_distributed
-            #            and args.rank % ngpus_per_node == 0):
-            #        save_checkpoint({
-            #            'epoch': epoch + 1,
-            #            'arch': args.arch,
-            #            'state_dict': model.state_dict(),
-            #            'best_acc': best_acc,
-            #            'optimizer' : optimizer.state_dict(),
-            #        }, is_best, "iemocap_checkpoint.pth.tar", args.dataset)
+            is_best = valid_acc > best_acc
 
         elif args.dataset == "mosei_emo":
             train_acc, train_f1 = eval_mosei_emo(train_results, train_truth)
@@ -346,19 +322,7 @@ def main_worker(gpu, ngpus_per_node, args):
                     .format(epoch, test_f1[0], test_f1[1], test_f1[2], test_f1[3], test_f1[4], test_f1[5]))
             print('-' * 50)
             test_acc = (sum(test_acc) + sum(test_f1)) / 12
-            is_best = test_acc > best_acc
-            #if is_best:
-            #    best_epoch = epoch
-            #    best_acc = max(test_acc, best_acc)
-            #    if not args.multiprocessing_distributed or (args.multiprocessing_distributed
-            #            and args.rank % ngpus_per_node == 0):
-            #        save_checkpoint({
-            #            'epoch': epoch + 1,
-            #            'arch': args.arch,
-            #            'state_dict': model.state_dict(),
-            #            'best_acc': best_acc,
-            #            'optimizer' : optimizer.state_dict(),
-            #        }, is_best, "mosei_emo_checkpoint_{}.pth.tar".format(random.random()), args.dataset)
+            is_best = valid_acc > best_acc
         else:
             print("evalutation for other datasets coming soon")
             assert False
